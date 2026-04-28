@@ -8,7 +8,7 @@ steps:
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image',
-    './gke-cicd/app1'
+    './app1'
   ]
 
 # -------------------------------
@@ -30,7 +30,7 @@ steps:
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image',
-    './gke-cicd/app2'
+    './app2'
   ]
 
 # -------------------------------
@@ -54,24 +54,18 @@ steps:
     - |
       set -e
 
-      gcloud deploy apply --file gke-cicd/deploy/pipeline.yaml --region=us-central1
-      gcloud deploy apply --file gke-cicd/deploy/dev.yaml --region=us-central1
-      gcloud deploy apply --file gke-cicd/deploy/prod.yaml --region=us-central1
+      gcloud deploy apply --file deploy/pipeline.yaml --region=us-central1
+      gcloud deploy apply --file deploy/dev.yaml --region=us-central1
+      gcloud deploy apply --file deploy/prod.yaml --region=us-central1
 
       gcloud deploy releases create app-release-${SHORT_SHA} \
         --delivery-pipeline=gke-cicd-pipeline \
         --region=us-central1 \
-        --from-k8s-manifest=./gke-cicd/k8s
+        --from-k8s-manifest=./kubernetes
 
-# -------------------------------
-# Images to register
-# -------------------------------
 images:
 - 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
 - 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
 
-# -------------------------------
-# FIX FOR YOUR ERROR (LOGGING)
-# -------------------------------
 options:
   logging: CLOUD_LOGGING_ONLY
