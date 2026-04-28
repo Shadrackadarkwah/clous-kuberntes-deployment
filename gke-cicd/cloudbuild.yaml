@@ -1,31 +1,57 @@
 steps:
+# Build App 1
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'us-central1-docker.pkg.dev/<cicd-pipeline-494610>/gke-repo/quickstart-image', './gke-cicd/app1']
+  args: [
+    'build',
+    '-t',
+    'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image',
+    './gke-cicd/app1'
+  ]
   id: 'Build Docker Image 1'
 
+# Push App 1
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image']
+  args: [
+    'push',
+    'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
+  ]
   id: 'Push Docker Image 1'
 
+# Build App 2
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image', './gke-cicd/app2']
+  args: [
+    'build',
+    '-t',
+    'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image',
+    './gke-cicd/app2'
+  ]
   id: 'Build Docker Image 2'
 
+# Push App 2
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image']
+  args: [
+    'push',
+    'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
+  ]
   id: 'Push Docker Image 2'
 
+# Deploy with Cloud Deploy
 - name: 'google/cloud-sdk:latest'
-  entrypoint: 'sh'
+  entrypoint: 'bash'
   args:
-    - -xe
-    - -c
+    - '-c'
     - |
+      set -e
+
       gcloud deploy apply --file gke-cicd/deploy/pipeline.yaml --region=us-central1
       gcloud deploy apply --file gke-cicd/deploy/dev.yaml --region=us-central1
       gcloud deploy apply --file gke-cicd/deploy/prod.yaml --region=us-central1
 
-      gcloud deploy releases create "app-release-${SHORT_SHA}" --delivery-pipeline=gke-cicd-pipeline --region=us-central1 --from-k8s-manifest=./gke-cicd/kubernetes/app.yaml
+      gcloud deploy releases create app-release-${SHORT_SHA} \
+        --delivery-pipeline=gke-cicd-pipeline \
+        --region=us-central1 \
+        --from-k8s-manifest=./gke-cicd/k8s
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+images:
+- 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
+- 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
