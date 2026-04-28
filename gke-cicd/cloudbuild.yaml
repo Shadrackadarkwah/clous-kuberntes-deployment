@@ -1,42 +1,53 @@
 steps:
+# -------------------------------
 # Build App 1
+# -------------------------------
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'Build Docker Image 1'
   args: [
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image',
     './gke-cicd/app1'
   ]
-  id: 'Build Docker Image 1'
 
+# -------------------------------
 # Push App 1
+# -------------------------------
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'Push Docker Image 1'
   args: [
     'push',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
   ]
-  id: 'Push Docker Image 1'
 
+# -------------------------------
 # Build App 2
+# -------------------------------
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'Build Docker Image 2'
   args: [
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image',
     './gke-cicd/app2'
   ]
-  id: 'Build Docker Image 2'
 
+# -------------------------------
 # Push App 2
+# -------------------------------
 - name: 'gcr.io/cloud-builders/docker'
+  id: 'Push Docker Image 2'
   args: [
     'push',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
   ]
-  id: 'Push Docker Image 2'
 
-# Deploy with Cloud Deploy
+# -------------------------------
+# Deploy using Cloud Deploy
+# -------------------------------
 - name: 'google/cloud-sdk:latest'
+  id: 'Deploy to GKE via Cloud Deploy'
   entrypoint: 'bash'
   args:
     - '-c'
@@ -52,6 +63,15 @@ steps:
         --region=us-central1 \
         --from-k8s-manifest=./gke-cicd/k8s
 
+# -------------------------------
+# Images to register
+# -------------------------------
 images:
 - 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
 - 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
+
+# -------------------------------
+# FIX FOR YOUR ERROR (LOGGING)
+# -------------------------------
+options:
+  logging: CLOUD_LOGGING_ONLY
