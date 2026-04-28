@@ -1,67 +1,52 @@
 steps:
-# -------------------------------
-# Build App 1
-# -------------------------------
+# Build App1
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Build Docker Image 1'
   args: [
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image',
-    './app1'
+    './gke-cicd/app1'
   ]
 
-# -------------------------------
-# Push App 1
-# -------------------------------
+# Push App1
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Push Docker Image 1'
   args: [
     'push',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
   ]
 
-# -------------------------------
-# Build App 2
-# -------------------------------
+# Build App2
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Build Docker Image 2'
   args: [
     'build',
     '-t',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image',
-    './app2'
+    './gke-cicd/app2'
   ]
 
-# -------------------------------
-# Push App 2
-# -------------------------------
+# Push App2
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Push Docker Image 2'
   args: [
     'push',
     'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/flask-image'
   ]
 
-# -------------------------------
-# Deploy using Cloud Deploy
-# -------------------------------
+# Deploy
 - name: 'google/cloud-sdk:latest'
-  id: 'Deploy to GKE via Cloud Deploy'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
       set -e
 
-      gcloud deploy apply --file deploy/pipeline.yaml --region=us-central1
-      gcloud deploy apply --file deploy/dev.yaml --region=us-central1
-      gcloud deploy apply --file deploy/prod.yaml --region=us-central1
+      gcloud deploy apply --file gke-cicd/deploy/pipeline.yaml --region=us-central1
+      gcloud deploy apply --file gke-cicd/deploy/dev.yaml --region=us-central1
+      gcloud deploy apply --file gke-cicd/deploy/prod.yaml --region=us-central1
 
       gcloud deploy releases create app-release-${SHORT_SHA} \
         --delivery-pipeline=gke-cicd-pipeline \
         --region=us-central1 \
-        --from-k8s-manifest=./kubernetes
+        --source=gke-cicd
 
 images:
 - 'us-central1-docker.pkg.dev/cicd-pipeline-494610/gke-repo/quickstart-image'
