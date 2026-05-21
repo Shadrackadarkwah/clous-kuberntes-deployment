@@ -1,4 +1,4 @@
-FROM python:3.14.5
+FROM python:3.15-rc-slim-trixie
 
 EXPOSE 8081
 WORKDIR /app2
